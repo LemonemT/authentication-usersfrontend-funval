@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 function Dashboard() {
@@ -11,6 +11,15 @@ function Dashboard() {
     phone: user?.phone || '',
     email: user?.email || '',
   });
+
+  useEffect(() => {
+    setFormData({
+      name: user?.name || '',
+      bio: user?.bio || '',
+      phone: user?.phone || '',
+      email: user?.email || '',
+    });
+  }, [user]);
 
   if (isLoading) {
     return <div>CARGANDO...</div>;
@@ -36,6 +45,7 @@ function Dashboard() {
     try {
       await updateUserMutation.mutateAsync(formData); // Usa la mutación para actualizar el usuario
       setEditMode(false); // Cierra el modo de edición al guardar los cambios
+      window.location.reload(); // Fuerza la recarga de la página
     } catch (error) {
       console.error('Error updating user:', error);
     }
