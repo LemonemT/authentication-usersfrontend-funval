@@ -38,3 +38,20 @@ export const getMe = async () => {
     throw error;
   }
 };
+
+// Nueva función para actualizar los datos del usuario
+export const updateUser = async (userData) => {
+  const token = localStorage.getItem('tokenLogin');
+  try {
+    const response = await axios.put('http://localhost:3000/api/users/update', userData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log('Respuesta de actualización del usuario:', response.data); // Verifica la respuesta
+    return response.data;
+  } catch (error) {
+    console.error('Error en updateUser:', error.response || error);
+    throw error;
+  }
+};

@@ -2,8 +2,15 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 function Dashboard() {
-  const { isLoading, user, logout } = useContext(AuthContext);
+  const { isLoading, user, logout, updateUserMutation } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    bio: user?.bio || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+  });
 
   if (isLoading) {
     return <div>CARGANDO...</div>;
@@ -12,6 +19,37 @@ function Dashboard() {
   if (!user) {
     return <div>Usuario no encontrado</div>;
   }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleEditClick = () => {
+    setEditMode(true);
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      await updateUserMutation.mutateAsync(formData); // Usa la mutación para actualizar el usuario
+      setEditMode(false); // Cierra el modo de edición al guardar los cambios
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const handleCancelClick = () => {
+    setFormData({
+      name: user?.name || '',
+      bio: user?.bio || '',
+      phone: user?.phone || '',
+      email: user?.email || '',
+    });
+    setEditMode(false);
+  };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -33,7 +71,7 @@ function Dashboard() {
               </button>
             </div>
           )}
-          <span className="text-gray-700">{user?.name} {user?.l_name}</span>
+          <span className="text-gray-700">{user?.name}</span>
         </div>
       </div>
 
@@ -43,9 +81,29 @@ function Dashboard() {
             <h1 className="text-xl font-bold">Profile</h1>
             <p className="text-gray-600">Some info may be visible to other people</p>
           </div>
-          <button className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100">
-            Edit
-          </button>
+          {editMode ? (
+            <div>
+              <button
+                onClick={handleSaveClick}
+                className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100 mr-2"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleCancelClick}
+                className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleEditClick}
+              className="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100"
+            >
+              Edit
+            </button>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -59,19 +117,59 @@ function Dashboard() {
           </div>
           <div className="flex justify-between py-4 border-b">
             <span className="text-gray-500">NAME</span>
-            <span>{user?.name} {user?.l_name}</span>
+            {editMode ? (
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="text-right border border-gray-300 rounded-md px-2 py-1"
+              />
+            ) : (
+              <span>{formData.name}</span>
+            )}
           </div>
           <div className="flex justify-between py-4 border-b">
             <span className="text-gray-500">BIO</span>
-            <span className="text-right">{user?.bio ?? 'NO REGISTRADO'}</span>
+            {editMode ? (
+              <input
+                type="text"
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                className="text-right border border-gray-300 rounded-md px-2 py-1"
+              />
+            ) : (
+              <span className="text-right">{formData.bio || 'NO REGISTRADO'}</span>
+            )}
           </div>
           <div className="flex justify-between py-4 border-b">
             <span className="text-gray-500">PHONE</span>
-            <span className="text-right">{user?.phone ?? 'NO REGISTRADO'}</span>
+            {editMode ? (
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="text-right border border-gray-300 rounded-md px-2 py-1"
+              />
+            ) : (
+              <span className="text-right">{formData.phone || 'NO REGISTRADO'}</span>
+            )}
           </div>
           <div className="flex justify-between py-4 border-b">
             <span className="text-gray-500">EMAIL</span>
-            <span className="text-right">{user?.email}</span>
+            {editMode ? (
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="text-right border border-gray-300 rounded-md px-2 py-1"
+              />
+            ) : (
+              <span className="text-right">{formData.email}</span>
+            )}
           </div>
           <div className="flex justify-between py-4 border-b">
             <span className="text-gray-500">PASSWORD</span>

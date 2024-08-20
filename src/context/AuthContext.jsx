@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { getMe, loginUser, registerUser } from '../services/authService';
+import { getMe, loginUser, registerUser, updateUser } from '../services/authService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -40,6 +40,19 @@ export const AuthProvider = ({ children }) => {
     },
   });
 
+  const updateUserMutation = useMutation({
+    mutationKey: ['updateUser'],
+    mutationFn: updateUser,
+    onError: (error) => {
+      console.error('Error al actualizar el usuario:', error);
+      alert('Error al actualizar el usuario.');
+    },
+    onSuccess: (data) => {
+      console.log('Usuario actualizado:', data);
+      setUser(data);
+    },
+  });
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['user'],
     queryFn: getMe,
@@ -65,6 +78,7 @@ export const AuthProvider = ({ children }) => {
         user,
         loginMutation,
         registerMutation,
+        updateUserMutation,
         isLoading,
         logout,
         isError,
